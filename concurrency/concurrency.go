@@ -1,27 +1,26 @@
 package concurrency
 
-import (
-	"sync"
-)
-
 type WebsiteChecker func(string) bool
 
+type result struct {
+	string
+	bool
+}
+
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
-	var wg sync.WaitGroup
-	var mu sync.Mutex // mutex
-
 	results := make(map[string]bool)
+	resultChannel := make(chan result)
 
-	wg.Add(len(urls))
 	for _, url := range urls {
 		go func(u string) {
-			defer wg.Done()
-			mu.Lock()
-			results[u] = wc(u)
-			mu.Unlock()
+			resultChannel <- result{u, wc(u)}
 		}(url)
 	}
 
-	wg.Wait()
+	for i := 0; i < len(urls); i++ {
+		r := <-resultChannel
+		results[r.string] = r.bool
+	}
+
 	return results
 }
