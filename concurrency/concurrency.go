@@ -8,7 +8,7 @@ type WebsiteChecker func(string) bool
 
 func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	var wg sync.WaitGroup
-	//var mu sync.Mutex // mutex
+	var mu sync.Mutex // mutex
 
 	results := make(map[string]bool)
 
@@ -16,9 +16,9 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 	for _, url := range urls {
 		go func(u string) {
 			defer wg.Done()
-			//mu.Lock()
+			mu.Lock()
 			results[u] = wc(u)
-			//mu.Unlock()
+			mu.Unlock()
 		}(url)
 	}
 
