@@ -1,7 +1,6 @@
 package concurrency
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -15,13 +14,12 @@ func CheckWebsites(wc WebsiteChecker, urls []string) map[string]bool {
 
 	wg.Add(len(urls))
 	for _, url := range urls {
-		go func() {
-			fmt.Println(url) // for문의 url이 재사용되기 때문에 끝에 값에만 goroutine이 돌고 있는 문제 발생
+		go func(u string) {
 			defer wg.Done()
 			//mu.Lock()
-			results[url] = wc(url)
+			results[u] = wc(u)
 			//mu.Unlock()
-		}()
+		}(url)
 	}
 
 	wg.Wait()
